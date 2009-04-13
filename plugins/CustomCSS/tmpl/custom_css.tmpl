@@ -1,0 +1,239 @@
+<mt:setvarblock name="page_title"><__trans phrase="Edit Custom CSS"></mt:setvarblock>
+<mt:setvarblock name="html_title"><__trans phrase="Edit Custom CSS"></mt:setvarblock>
+<mt:var name="position_actions_bottom" value="1">
+<mt:setvarblock name="system_msg">
+    <mt:unless name="recovered_object">
+        <mt:if name="autosaved_object_exists">
+            <mtapp:statusmsg
+                id="autosaved-object-exists"
+                can_close="1"
+                class="info">
+                <__trans phrase="A saved version of this [_1] was auto-saved [_3]. <a href="[_2]">Recover auto-saved content</a>" params="<mt:var name="object_label">%%<mt:var name="script_url">?__mode=view&amp;_type=template&amp;&amp;_recover=1&amp;blog_id=<mt:var name="blog_id" escape="url"><mt:if name="id">&amp;id=<mt:var name="id" escape="url"></mt:if>%%<mt:If name="blog_id"><mt:date ts="$autosaved_object_ts" relative="1" offset_blog_id="<$mt:var name="blog_id"$>"></mt:If>">
+            </mtapp:statusmsg>
+        </mt:if>
+    </mt:unless>
+    <mt:if name="recovered_object">
+        <mtapp:statusmsg
+            id="recovered-object"
+            class="success">
+            <__trans phrase="You have successfully recovered your saved [_1]." params="<mt:var name="object_label">">
+        </mtapp:statusmsg>
+    </mt:if>
+    <mt:if name="recovered_failed">
+        <mtapp:statusmsg
+            id="recovered-failed"
+            class="error">
+            <__trans phrase="An error occurred while trying to recover your saved [_1]." params="<mt:var name="object_label">">
+        </mtapp:statusmsg>
+    </mt:if>
+    <mt:if name="saved">
+        <mt:if name="error">
+            <mtapp:statusmsg
+                id="generic-error"
+                class="error">
+                <__trans phrase="Your template changes have been saved.">
+                <mt:var name="error">
+            </mtapp:statusmsg>
+        <mt:else>
+            <mtapp:statusmsg
+                id="saved"
+                class="success">
+                <__trans phrase="Your template changes have been saved.">
+                <mt:unless name="build_dynamic">
+                <mt:unless name="build_type_0">
+                    <mt:if name="has_rebuild">
+                        <mt:if name="can_rebuild">
+                            <__trans phrase="<a href="[_1]" class="rebuild-link">Publish</a> this template." params="<mt:var name="script_url">?__mode=start_rebuild&amp;blog_id=<mt:var name="blog_id" escape="url">&amp;next=0&amp;type=index-<mt:var name="id" escape="url">&amp;tmpl_id=<mt:var name="id" escape="url">&amp;single_template=1'"></a>
+                        </mt:if>
+                    </mt:if>
+                </mt:unless>
+                </mt:unless>
+            </mtapp:statusmsg>
+        </mt:if>
+    <mt:else>
+        <mt:if name="error">
+            <mtapp:statusmsg
+                id="generic-error"
+                class="error">
+                <mt:var name="error">
+            </mtapp:statusmsg>
+        </mt:if>
+    </mt:if>
+    <mt:if name="message">
+        <mtapp:statusmsg
+            id="message"
+            class="alert">
+            <mt:var name="message">
+        </mtapp:statusmsg>
+    </mt:if>
+</mt:setvarblock>
+<mt:setvartemplate name="action_buttons">
+    <button
+        onclick="return validate(this.form);"
+        type="submit"
+        accesskey="s"
+        tabindex="12"
+        title="<__trans phrase="Save (s)">"
+        class="primary-button"
+        ><__trans phrase="Save"></button>
+    <div id="autosave-notification-<$mt:var name="bar_position" escape="html" default="top"$>" class="autosave-notification"></div>
+</mt:setvartemplate>
+<mt:setvarblock name="html_head" append="1">
+<script type="text/javascript" src="<mt:var name="static_uri">js/tc/client.js"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var tag_inserts = {};
+var snippets = [];
+<mt:loop name="template_snippets">
+var content = "<mt:var name="content" escape="js">";
+<mt:if name="trigger">
+var output = content.replace(/\$(?!0)/g, '');
+snippets.push({ 'input' : '<mt:var name="trigger" escape="js">',
+    'output' : output });
+</mt:if>
+content = content.replace(/\$0/, '');
+tag_inserts['<mt:var name="id" escape="js">'] = content;
+</mt:loop>
+
+if ( !window.Editor )
+    Editor = { strings: {} };
+Editor.strings.unsavedChanges = '<__trans phrase="You have unsaved changes to this template that will be lost." escape="js">'; 
+
+var fieldStorage = {};
+var dirty = false;
+function setDirty () {
+    log.warn('deprecated function setDirty(), call app.setDirty instead');
+    app.setDirty();
+}
+function clearDirty () {
+    log.warn('deprecated function clearDirty(), call app.clearDirty instead');
+    app.clearDirty();
+}
+
+function insertSnippet(el) {
+    if (el.selectedIndex == -1) return false;
+    var opt = el.options[el.selectedIndex].value;
+    if (!opt) return false;
+    el.selectedIndex = 0;
+    if (tag_inserts[opt]) {
+        app.insertCode( tag_inserts[opt] );
+    }
+}
+function setRebuild(f) {
+    f['rebuild'].value = 'Y';
+}
+
+function validate (f, rebuild) {
+    app.clearDirty();
+    if (rebuild) setRebuild(f);
+    return true;
+}
+function setCreateMode () {
+    var el = getByID('map-message');
+    if (el) el.style.display = 'none';
+    getByID('create-inline-mapping').style.display = 'block';
+    return false;
+}
+
+function cancelCreateMode () {
+    getByID('create-inline-mapping').style.display = 'none';
+    return false;
+}
+
+function init() {
+    var txt = getByID("text");
+    if (txt) {
+        var w;
+        if (w = txt.contentWindow) {
+            if (w.Language) {
+                if (w.Language && !w.Language.snippets) {
+                    w.Language.snippets = [];
+                }
+                var fsnippets = w.Language.snippets;
+                for (var i = 0; i < snippets.length; i++) {
+                    fsnippets.push(snippets[i]);
+                }
+            }
+        }
+    }
+}
+
+TC.attachLoadEvent( init );
+/* ]]> */
+</script>
+</mt:setvarblock>
+<mt:setvarblock name="html_body" append="1">
+    <mt:if name="dirty">
+    <script type="text/javascript">
+        /* <![CDATA[ */
+            MT.App.dirty = true;
+        /* ]]> */
+    </script>
+    </mt:if>
+</mt:setvarblock>
+<mt:include name="include/header.tmpl">
+
+<form name="template-listing-form" id="template-listing-form" method="post" action="<mt:var name="script_url">" mt:once="1" mt:auto-save="1" mt:auto-save-delay="<$mt:var name="autosave_frequency"$>000">
+<input type="hidden" name="id" value="<mt:var name="id" escape="html">" />
+<input type="hidden" name="blog_id" value="<mt:var name="blog_id" escape="html" default="0">" />
+<input type="hidden" name="type" value="<mt:var name="type" escape="html">" />
+<input type="hidden" name="__mode" value="custom_css_save" />
+<input type="hidden" name="_type" value="template" />
+<input type="hidden" name="rebuild" value="" />
+<input type="hidden" name="action_name" value="" />
+<input type="hidden" name="action_input" value="" />
+<input type="hidden" name="return_args" value="<mt:var name="return_args" escape="html">" />
+<input type="hidden" name="magic_token" value="<mt:var name="magic_token">" />
+
+<mt:include name="include/actions_bar.tmpl" hide_pager="1">
+
+<mtapp:setting
+    id="template-body"
+    label="$template_name"
+    label_class="no-header"
+    help_page="templates"
+    help_section="template_name">
+    <div id="template-body-actions">
+        <span class="codepress-toolbar" style="float:right">
+            <a href="javascript: void 0;" title="<__trans phrase="Syntax Highlight On" escape="singlequotes">" mt:command="set-mode-codepress-on" class="command-toggle-codepress-on toolbar button"><b>Syntax Hightlight On</b><s></s></a>
+            <a href="javascript: void 0;" title="<__trans phrase="Syntax Highlight Off" escape="singlequotes">" mt:command="set-mode-codepress-off" class="command-toggle-codepress-off toolbar button"><b>Syntax Hightlight Off</b><s></s></a>
+        </span>
+        <mt:if name="template_snippets">
+        <select id="tag-insert" tabindex="2" name="tag-insert" onchange="insertSnippet(this)">
+            <option value=""><__trans phrase="Insert..."></option>
+            <mt:loop name="template_snippets">
+            <option value="<mt:var name="id" escape="html">"><mt:var name="label" escape="html"><mt:if name="trigger"> (<mt:var name="trigger" escape="html">)</mt:if></option>
+            </mt:loop>
+        </select>
+        </mt:if>
+    </div>
+    <div id="textarea-enclosure" style="position: relative; padding-bottom: 10px; height: <mt:var name="disp_prefs_height_text" default="290">px" mt:min-height="66" mt:update-field-height="text_height">
+        <textarea tabindex="3" class="full-width monospace medium" spellcheck="false" name="text" id="text" cols="" rows="" mt:watch-change="1" style="height: <mt:var name="disp_prefs_height_text" default="290">px" mt:editor="codepress" mt:editor-options="lang:<mt:var name="template_lang"> autocomplete:off" /><mt:var name="text" escape="html"></textarea>
+        <input type="hidden" name="text_height" id="text_height" value="<mt:var name="disp_prefs_height_text" default="290">" />
+        <div class="resizer" mt:delegate="resizer" mt:target="textarea-enclosure" mt:lock="x">
+            <img src="<$mt:var name="static_uri"$>images/spacer.gif" width="100%" height="10"/>
+        </div>
+    </div>
+</mtapp:setting>
+
+<mt:include name="include/actions_bar.tmpl" bar_position="bottom" hide_pager="1">
+</form>
+
+<script type="text/javascript">
+/* <![CDATA[ */
+App.singletonConstructor =
+MT.App = new Class( MT.App, {
+
+    initComponents: function() {
+       arguments.callee.applySuper( this, arguments );
+    },
+
+    autoSave: function() {
+        arguments.callee.applySuper( this, arguments );
+    }
+
+} );
+/* ]]> */
+</script>
+
+<mt:include name="include/footer.tmpl">
