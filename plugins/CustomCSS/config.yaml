@@ -3,15 +3,23 @@ description: "Adds a large Custom CSS editing capability accessible from your De
 
 applications:
   cms:
-    menus:
-      design:custom_css:
-        label: "Custom Stylesheet"
-        mode: custom_css_edit
-        order: 1000
-        scope: blog
+    menus: $CustomCSS::CustomCSS::Plugin::load_menus
     methods:
       custom_css_edit: $CustomCSS::CustomCSS::Plugin::edit
       custom_css_save: $CustomCSS::CustomCSS::Plugin::save
+
+blog_config_template: '<mt:PluginConfigForm id="CustomCSS">'
+settings:
+  force_enable_custom_css:
+    scope: blog
+plugin_config:
+  CustomCSS:
+    fieldset1:
+      force_enable_custom_css:
+        type: checkbox
+        label: '<span style="white-space: nowrap;">Enable Custom CSS?</span>'
+        hint: 'This setting will forcibly display the "Customize CSS" menu option for the blog in which this is checked. If you utilize a template set for which this plugin has been activated, then the setting above will have no effect.'
+        tag: 'IfSuppressCreateEntry?'
 
 tags:
   function:

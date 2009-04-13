@@ -13,9 +13,47 @@ sub plugin {
 
 sub id { 'custom_css' }
 
+sub uses_custom_css {
+    local $@;
+    my $blog = MT->instance->blog;
+
+    return 0 if !$blog;
+
+    # If the user has forcibly enabled custom css, then return true.
+    return 1 if plugin()->get_config_value('force_enable_custom_css','blog:'.$blog->id);
+ 
+    # If the user is utilizing a template set for which custom css has been enabled
+    # for an index template, return true.
+    my $ts = MT->instance->blog->template_set;
+    my $app = MT::App->instance;
+    my $tmpls = $app->registry('template_sets')->{$ts}->{templates}->{index};
+    foreach my $t (keys %$tmpls) {
+	return 1 if $tmpls->{$t}->{custom_css};
+    }
+    return 0;
+}
+
+sub load_menus {
+    if (uses_custom_css()) {
+        my $plugin = plugin();
+        delete $plugin->{registry}->{applications}->{cms}->{menus};
+        my $core = MT->component('Core');
+        my $menus = $core->{registry}->{applications}->{cms}->{menus};
+        return {
+            'design:custom_css' => {
+                label => 'Customize Stylesheet',
+                order => 1000,
+                mode => 'custom_css_edit',
+                view => "blog",
+#                permission => 'edit_templates',
+            },
+        };
+    }
+    return {};
+}
+
 sub edit {
     my $app = shift;
-
     my ($param) = @_;
     my $q = $app->{query};
     my $blog = MT::Blog->load($q->param('blog_id'));
@@ -81,6 +119,23 @@ sub save {
     my $plugin = plugin();
     my $scope = "blog:" . $blog->id;
     $plugin->set_config_value('custom_css',$css,$scope);
+
+    my $ts = MT->instance->blog->template_set;
+    my $app = MT::App->instance;
+    my $tmpls = $app->registry('template_sets')->{$ts}->{templates}->{index};
+    foreach my $t (keys %$tmpls) {
+	if ($tmpls->{$t}->{custom_css}) {
+	    my $tmpl = MT->model('template')->load({
+		blog_id => $blog->id,
+		identifier => $t,
+            });
+	    MT->log({ 
+		blog_id => $blog->id,
+		message => 'Custom CSS plugn is republishing ' . $tmpl->name,
+	    });
+	    $tmpl->build();
+	}
+    }
 
     $app->add_return_arg( saved => 1 );
     return $app->call_return;
