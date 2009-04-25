@@ -133,7 +133,11 @@ sub save {
 		blog_id => $blog->id,
 		message => 'Custom CSS plugn is republishing ' . $tmpl->name,
 	    });
-	    $tmpl->build();
+	    $app->rebuild_indexes(
+		Blog     => $blog,
+		Template => $tmpl,
+		Force    => 1,
+		);
 	}
     }
 

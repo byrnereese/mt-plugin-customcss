@@ -50,7 +50,16 @@ unless one of the two conditions have been met:
 
 ## Enabling the Custom CSS Menu Item
 
-To for
+If you are using a theme that does not explicitly support this plugin, 
+but would still like to utilize its functionality, follow these steps:
+
+1. From your blog's dashboard, click "Plugins" from the "Tools" menu.
+2. Find "Custom CSS" in the list of plugins and click its name.
+3. Click "Settings."
+4. Click the check box labeled, "Enable Custom CSS" and hit Save. 
+
+Once the page has reloaded you will see the "Customize Stylesheet" 
+option in the Design menu for that blog.
 
 ## Embedding Custom CSS into your Stylesheet
 
