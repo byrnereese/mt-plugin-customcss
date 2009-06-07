@@ -45,7 +45,7 @@ sub load_menus {
                 order => 1000,
                 mode => 'custom_css_edit',
                 view => "blog",
-#                permission => 'edit_templates',
+                permission => 'edit_templates',
             },
         };
     }

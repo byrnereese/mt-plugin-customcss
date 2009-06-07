@@ -1,6 +1,6 @@
 name: Custom CSS
 description: "Adds a large Custom CSS editing capability accessible from your Design menu."
-version: 0.91
+version: 0.92
 
 applications:
   cms:
