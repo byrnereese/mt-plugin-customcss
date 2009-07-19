@@ -57,7 +57,6 @@ sub edit {
     my $app = shift;
     my ($param) = @_;
     my $q = $app->{query};
-    my $blog = MT::Blog->load($q->param('blog_id'));
 
     $param ||= {};
 
@@ -122,7 +121,6 @@ sub save {
     $plugin->set_config_value('custom_css',$css,$scope);
 
     my $ts = MT->instance->blog->template_set;
-    my $app = MT::App->instance;
     my $tmpls = $app->registry('template_sets')->{$ts}->{templates}->{index};
     foreach my $t (keys %$tmpls) {
 	if ($tmpls->{$t}->{custom_css}) {
