@@ -1,10 +1,17 @@
 name: Custom CSS
 description: "Adds a large Custom CSS editing capability accessible from your Design menu."
-version: 0.94
+version: 0.95
 
 applications:
   cms:
-    menus: $CustomCSS::CustomCSS::Plugin::load_menus
+    menus: 
+      design:custom_css:
+        label: 'Customize Stylesheet'
+        order: 1000
+        mode: custom_css_edit
+        view: blog
+        permission: edit_templates
+        condition: $CustomCSS::CustomCSS::Plugin::uses_custom_css
     methods:
       custom_css_edit: $CustomCSS::CustomCSS::Plugin::edit
       custom_css_save: $CustomCSS::CustomCSS::Plugin::save

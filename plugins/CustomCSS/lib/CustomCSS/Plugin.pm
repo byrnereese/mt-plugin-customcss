@@ -14,7 +14,7 @@ sub plugin {
 sub id { 'custom_css' }
 
 sub uses_custom_css {
-    local $@;
+#    local $@;
     my $blog = MT->instance->blog;
 
     return 0 if !$blog;
@@ -32,25 +32,6 @@ sub uses_custom_css {
     return 1 if $tmpls->{$t}->{custom_css};
     }
     return 0;
-}
-
-sub load_menus {
-    if (uses_custom_css()) {
-        my $plugin = plugin();
-        delete $plugin->{registry}->{applications}->{cms}->{menus};
-        my $core = MT->component('Core');
-        my $menus = $core->{registry}->{applications}->{cms}->{menus};
-        return {
-            'design:custom_css' => {
-                label => 'Customize Stylesheet',
-                order => 1000,
-                mode => 'custom_css_edit',
-                view => "blog",
-                permission => 'edit_templates',
-            },
-        };
-    }
-    return {};
 }
 
 sub edit {
