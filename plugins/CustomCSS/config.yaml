@@ -1,6 +1,6 @@
 name: Custom CSS
 description: "Adds a large Custom CSS editing capability accessible from your Design menu."
-version: 0.95
+version: 0.96
 
 applications:
   cms:
@@ -16,18 +16,13 @@ applications:
       custom_css_edit: $CustomCSS::CustomCSS::Plugin::edit
       custom_css_save: $CustomCSS::CustomCSS::Plugin::save
 
-blog_config_template: '<mt:PluginConfigForm id="CustomCSS">'
-settings:
+options:
   force_enable_custom_css:
+    label: '<span style="white-space: nowrap;">Enable Custom CSS?</span>'
+    hint: 'This setting will forcibly display the "Customize CSS" menu option for the blog in which this is checked. If you utilize a template set for which this plugin has been activated, then the setting above will have no effect.'
+    tag: 'IfSuppressCreateEntry?'
     scope: blog
-plugin_config:
-  CustomCSS:
-    fieldset1:
-      force_enable_custom_css:
-        type: checkbox
-        label: '<span style="white-space: nowrap;">Enable Custom CSS?</span>'
-        hint: 'This setting will forcibly display the "Customize CSS" menu option for the blog in which this is checked. If you utilize a template set for which this plugin has been activated, then the setting above will have no effect.'
-        tag: 'IfSuppressCreateEntry?'
+    type: checkbox
 
 tags:
   function:
