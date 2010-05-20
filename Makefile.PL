@@ -1,7 +1,12 @@
 use ExtUtils::MakeMaker;
 
+use YAML::Any qw(LoadFile);
+my $file = "plugins/CustomCSS/config.yaml";
+my $version = LoadFile($file)->{version} ||
+    die "No version found in $file";
+
 WriteMakefile(
     NAME            => 'Custom CSS',
-    VERSION         => '0.96',
+    VERSION         => $version,
     DISTNAME        => 'CustomCSS',
 );

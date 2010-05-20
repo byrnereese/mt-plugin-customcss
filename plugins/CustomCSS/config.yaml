@@ -16,6 +16,20 @@ applications:
       custom_css_edit: $CustomCSS::CustomCSS::Plugin::edit
       custom_css_save: $CustomCSS::CustomCSS::Plugin::save
 
+page_actions:
+  theme_dashboard:
+    custom_css:
+      label: 'Customize Stylesheet'
+      order: 102
+      mode: 'custom_css_edit'
+      condition: >
+          sub {
+            my $plugin = MT->component('CustomCSS');
+            return 0 if !$plugin;
+            require CustomCSS::Plugin;
+            return CustomCSS::Plugin::uses_custom_css();
+          }
+
 options:
   force_enable_custom_css:
     label: '<span style="white-space: nowrap;">Enable Custom CSS?</span>'
