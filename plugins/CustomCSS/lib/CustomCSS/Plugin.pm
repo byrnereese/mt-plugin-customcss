@@ -26,8 +26,8 @@ sub uses_custom_css {
     # for an index template, return true.
     my $ts = MT->instance->blog->template_set;
     my $app = MT::App->instance;
-    return 0 if (ref($app->registry('template_sets')->{$ts}->{templates}) ne 'HASH');
-    my $tmpls = $app->registry('template_sets')->{$ts}->{templates}->{index};
+    return 0 if (ref($app->registry('template_sets',$ts,'templates')) ne 'HASH');
+    my $tmpls = $app->registry('template_sets',$ts,'templates','index');
     foreach my $t (keys %$tmpls) {
 	return 1 if $tmpls->{$t}->{custom_css};
     }
@@ -102,7 +102,7 @@ sub save {
     $plugin->set_config_value('custom_css',$css,$scope);
 
     my $ts = MT->instance->blog->template_set;
-    my $tmpls = $app->registry('template_sets')->{$ts}->{templates}->{index};
+    my $tmpls = $app->registry('template_sets',$ts,'templates','index');
     foreach my $t (keys %$tmpls) {
     if ($tmpls->{$t}->{custom_css}) {
         my $tmpl = MT->model('template')->load({
