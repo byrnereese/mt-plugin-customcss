@@ -26,10 +26,14 @@ sub uses_custom_css {
     # for an index template, return true.
     my $ts = MT->instance->blog->template_set;
     my $app = MT::App->instance;
-    return 0 if (ref($app->registry('template_sets',$ts,'templates')) ne 'HASH');
-    my $tmpls = $app->registry('template_sets',$ts,'templates','index');
+    my $tmpl_hash = $app->registry('template_sets',$ts,'templates');
+    return 0 if (ref($tmpl_hash) ne 'HASH');
+    if ($tmpl_hash eq '*') {
+        $tmpl_hash = MT->registry("default_templates");
+    }
+    my $tmpls = $tmpl_hash->{'index'};
     foreach my $t (keys %$tmpls) {
-	return 1 if $tmpls->{$t}->{custom_css};
+        return 1 if $tmpls->{$t}->{'custom_css'};
     }
     return 0;
 }
@@ -102,25 +106,28 @@ sub save {
     $plugin->set_config_value('custom_css',$css,$scope);
 
     my $ts = MT->instance->blog->template_set;
-    my $tmpls = $app->registry('template_sets',$ts,'templates','index');
+    my $tmpl_hash = $app->registry('template_sets',$ts,'templates');
+    if ($tmpl_hash eq '*') {
+        $tmpl_hash = MT->registry("default_templates");
+    }
+    my $tmpls = $tmpl_hash->{'index'};
     foreach my $t (keys %$tmpls) {
-    if ($tmpls->{$t}->{custom_css}) {
-        my $tmpl = MT->model('template')->load({
-        blog_id => $blog->id,
-        identifier => $t,
+        if ($tmpls->{$t}->{custom_css}) {
+            my $tmpl = MT->model('template')->load({
+                blog_id => $blog->id,
+                identifier => $t,
             });
-        MT->log({ 
-        blog_id => $blog->id,
-        message => 'Custom CSS plugn is republishing ' . $tmpl->name,
-        });
-        $app->rebuild_indexes(
-        Blog     => $blog,
-        Template => $tmpl,
-        Force    => 1,
-        );
+            MT->log({ 
+                blog_id => $blog->id,
+                message => 'Custom CSS plugn is republishing ' . $tmpl->name,
+            });
+            $app->rebuild_indexes(
+                Blog     => $blog,
+                Template => $tmpl,
+                Force    => 1,
+            );
+        }
     }
-    }
-
     $app->add_return_arg( saved => 1 );
     return $app->call_return;
 }
