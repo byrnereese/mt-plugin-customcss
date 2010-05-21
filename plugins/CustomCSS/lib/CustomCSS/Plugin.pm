@@ -27,10 +27,10 @@ sub uses_custom_css {
     my $ts = MT->instance->blog->template_set;
     my $app = MT::App->instance;
     my $tmpl_hash = $app->registry('template_sets',$ts,'templates');
-    return 0 if (ref($tmpl_hash) ne 'HASH');
-    if ($tmpl_hash eq '*') {
+    if (ref($tmpl_hash) eq 'ARRAY' && $tmpl_hash->[0] eq '*') {
         $tmpl_hash = MT->registry("default_templates");
     }
+    return 0 if (ref($tmpl_hash) ne 'HASH');
     my $tmpls = $tmpl_hash->{'index'};
     foreach my $t (keys %$tmpls) {
         return 1 if $tmpls->{$t}->{'custom_css'};
@@ -76,7 +76,7 @@ sub edit {
         $param->{template_snippets} = \@snippets;
     }
 
-    $param->{screen_id} = "edit-template-" . $param->{type};
+    $param->{screen_id} = "edit-template-stylesheet";
 
     # if unset, default to 30 so if they choose to enable caching,
     # it will be preset to something sane.
@@ -107,9 +107,11 @@ sub save {
 
     my $ts = MT->instance->blog->template_set;
     my $tmpl_hash = $app->registry('template_sets',$ts,'templates');
-    if ($tmpl_hash eq '*') {
+    if (ref $tmpl_hash eq 'ARRAY' && $tmpl_hash->[0] eq '*') {
         $tmpl_hash = MT->registry("default_templates");
     }
+    use Data::Dumper;
+    MT->log( Dumper($tmpl_hash) );
     my $tmpls = $tmpl_hash->{'index'};
     foreach my $t (keys %$tmpls) {
         if ($tmpls->{$t}->{custom_css}) {
